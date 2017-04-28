@@ -1,0 +1,40 @@
+- hosts: all
+  become: true
+  gather_facts: no
+#  vars_files: 
+#    - conf/rules.yml
+
+  vars_prompt:
+    - name: "user_password"    
+      prompt: "Enter a password for the user"    
+      private: yes    
+      encrypt: "md5_crypt"
+      confirm: yes    
+      salt_size: 7
+
+  tasks:
+    - name: Create User enterprisedb
+      user: 
+       name: enterprisedb 
+       generate_ssh_key: yes
+       ssh_key_bits: 2048
+       ssh_key_file: .ssh/id_rsa
+       password: "{{ user_password }}"
+       state: present
+
+    - name: enable firewall
+      firewalld:
+       zone: public
+       port: "{{ item }}"
+       permanent: true
+       state: enabled
+      with_items:
+       - 5444/tcp
+       - 5432/tcp
+
+    - name: copy file rpm
+      copy: src=rpm/efm21-2.1.0-1.rhel7.x86_64.rpm dest=/tmp/efm21-2.1.0-1.rhel7.x86_64.rpm
+
+    - name: install nginx rpm from a local file
+      yum: name=/tmp/efm21-2.1.0-1.rhel7.x86_64.rpm state=present
+

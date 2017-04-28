@@ -1,0 +1,9 @@
+[enterprisedb]
+192.168.1.100
+
+[enterprisedb:vars]
+ansible_ssh_user=admin
+ansible_ssh_pass=admin
+ansible_become_method=su
+ansible_become_user=root
+ansible_become_pass=passadmin
